@@ -1,0 +1,15 @@
+introduction
+dataset
+the-models
+simple-linear-model
+poisson-linear-regression
+overview
+algorithmic-framework
+regression-line
+training-predicting-process
+binomial-linear-regression
+support-vector-machine
+generalized-additive-model
+neural-network
+data-nature
+regression-equation

@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Applied Machine Learning</title>
+  <meta name="description" content="Applied Machine Learning" />
+  <meta name="generator" content="bookdown 0.37 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Applied Machine Learning" />
+  <meta property="og:type" content="book" />
+  
+  
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Applied Machine Learning" />
+  
+  
+  
+
+<meta name="author" content="Sheptim, Wei-Han &amp; Eliana Perea Barreto" />
+
+
+<meta name="date" content="2024-04-30" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+
+<link rel="next" href="simple-linear-model.html"/>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
+<link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
+<script src="libs/kePrint-0.0.1/kePrint.js"></script>
+<link href="libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
+
+
+
+<style type="text/css">
+  
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">Applied ML</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Introduction</a>
+<ul>
+<li class="chapter" data-level="1.1" data-path="index.html"><a href="index.html#dataset"><i class="fa fa-check"></i><b>1.1</b> Dataset</a></li>
+<li class="chapter" data-level="1.2" data-path="index.html"><a href="index.html#the-models"><i class="fa fa-check"></i><b>1.2</b> The models</a></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="simple-linear-model.html"><a href="simple-linear-model.html"><i class="fa fa-check"></i><b>2</b> Simple Linear Model</a></li>
+<li class="chapter" data-level="3" data-path="poisson-linear-regression.html"><a href="poisson-linear-regression.html"><i class="fa fa-check"></i><b>3</b> Poisson Linear Regression</a>
+<ul>
+<li class="chapter" data-level="3.1" data-path="poisson-linear-regression.html"><a href="poisson-linear-regression.html#overview"><i class="fa fa-check"></i><b>3.1</b> Overview</a></li>
+<li class="chapter" data-level="3.2" data-path="poisson-linear-regression.html"><a href="poisson-linear-regression.html#algorithmic-framework"><i class="fa fa-check"></i><b>3.2</b> Algorithmic Framework</a>
+<ul>
+<li class="chapter" data-level="3.2.1" data-path="poisson-linear-regression.html"><a href="poisson-linear-regression.html#regression-line"><i class="fa fa-check"></i><b>3.2.1</b> Regression Line</a></li>
+</ul></li>
+<li class="chapter" data-level="3.3" data-path="poisson-linear-regression.html"><a href="poisson-linear-regression.html#training-predicting-process"><i class="fa fa-check"></i><b>3.3</b> Training &amp; Predicting Process</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="binomial-linear-regression.html"><a href="binomial-linear-regression.html"><i class="fa fa-check"></i><b>4</b> Binomial Linear Regression</a></li>
+<li class="chapter" data-level="5" data-path="support-vector-machine.html"><a href="support-vector-machine.html"><i class="fa fa-check"></i><b>5</b> Support Vector Machine</a></li>
+<li class="chapter" data-level="6" data-path="generalized-additive-model.html"><a href="generalized-additive-model.html"><i class="fa fa-check"></i><b>6</b> Generalized Additive Model</a></li>
+<li class="chapter" data-level="7" data-path="neural-network.html"><a href="neural-network.html"><i class="fa fa-check"></i><b>7</b> Neural Network</a></li>
+<li class="divider"></li>
+<li><a href="https://github.com/EliB29/Rboot_camp" target="blank">Published with bookdown</a></li>
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Applied Machine Learning</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="header">
+<h1 class="title">Applied Machine Learning</h1>
+<p class="author"><em>Sheptim, Wei-Han &amp; Eliana Perea Barreto</em></p>
+<p class="date"><em>2024-04-30</em></p>
+</div>
+<div id="introduction" class="section level1 hasAnchor" number="1">
+<h1><span class="header-section-number">Chapter 1</span> Introduction<a href="index.html#introduction" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p>In the contemporary landscape of Applied Machine Learning, predictive modeling has emerged as a crucial field of study to derive insights from data. This field encompasses a variety of methods, each showcasing distinct capabilities worthy of exploration. This project aims to comprehensively understand six machine learning methods, focusing on their application, structure, and outcomes, by covering the following key aspects.</p>
+<p>Firstly, an overview to introduce the fundamental principles of the model. Following, an in-depth examination of the algorithmic framework to explore the model’s architecture and computational mechanisms. Subsequently, a detailed description of the model’s training and predicting process to elucidate how the model acquires knowledge and makes predictions. Finally, an assessment of the strengths and limitations of the model to evaluate its practical utility, considering factors like interpretability, scalability and computational complexity.</p>
+<div id="dataset" class="section level2 hasAnchor" number="1.1">
+<h2><span class="header-section-number">1.1</span> Dataset<a href="index.html#dataset" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The dataset comprises an array of 19 predictors that withhold historical information regarding flight operations for all aircrafts departing from New York City airports throughout 2013. This table is easily accessible through the implementation of the following code:</p>
+<pre><code>library(nycflights13)
+data_flight &lt;- flights </code></pre>
+<p>As you can see in the code, this dataset is sourced from the <code>nycflights13</code> library in R, and despite containing only 19 predictors, it encompasses a total of 336,776 entries, which exceeds the criteria for a “moderate” dataset. To meet the project’s criteria of working with a dataset within a range of 10^3 to 10^5 rows, and also to simplify the analysis of the data, a method of random sampling is used to shrink the table to 5000 entries. Click on <code>Code Preview</code> to learn how this operation is coded.</p>
+<details>
+<p><summary><b style="font-size:90%; border: 1px solid gray; border-radius: 5px; padding: 5px; ">Code Preview </b></p>
+</summary>
+<pre><code># Set random seed to ensure reproducibility.
+set.seed(123)
+
+# Randomly select 5000 row indices and use them to subset original data.
+selected_indices &lt;- sample(1:nrow(data_flight), 5000, replace = FALSE)
+data_flight &lt;- data_flight[selected_indices, ]</code></pre>
+</details>
+<hr />
+<p>The table contains discrete categorical and numerical variables associated to predictors like year, month, day, carrier, origin, destination, and tail number. Additionally, continuous numerical attributes such as hour, minute, departure time, arrival time, departure delay, arrival delay, air time, and distance are included. Likewise, among the categorical variables, some are ordinal, like the month, while others are nominal, such as carrier, origin, destination, and tail number. Below, you’ll find a detailed depiction of the table layout and the column names:</p>
+<div style="overflow-x : auto; white-space: nowrap;">
+<table class="table" style="font-size: 11px; color: black; font-family: sans-serif; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:center;color: rgba(64, 64, 64, 255) !important;background-color: rgba(247, 247, 247, 255) !important;font-size: 12px;">
+year
+</th>
+<th style="text-align:center;color: rgba(64, 64, 64, 255) !important;background-color: rgba(247, 247, 247, 255) !important;font-size: 12px;">
+month
+</th>
+<th style="text-align:center;color: rgba(64, 64, 64, 255) !important;background-color: rgba(247, 247, 247, 255) !important;font-size: 12px;">
+day
+</th>
+<th style="text-align:center;color: rgba(64, 64, 64, 255) !important;background-color: rgba(247, 247, 247, 255) !important;font-size: 12px;">
+dep_time
+</th>
+<th style="text-align:center;color: rgba(64, 64, 64, 255) !important;background-color: rgba(247, 247, 247, 255) !important;font-size: 12px;">
+sched_dep_time
+</th>
+<th style="text-align:center;color: rgba(64, 64, 64, 255) !important;background-color: rgba(247, 247, 247, 255) !important;font-size: 12px;">
+dep_delay
+</th>
+<th style="text-align:center;color: rgba(64, 64, 64, 255) !important;background-color: rgba(247, 247, 247, 255) !important;font-size: 12px;">
+arr_time
+</th>
+<th style="text-align:center;color: rgba(64, 64, 64, 255) !important;background-color: rgba(247, 247, 247, 255) !important;font-size: 12px;">
+sched_arr_time
+</th>
+<th style="text-align:center;color: rgba(64, 64, 64, 255) !important;background-color: rgba(247, 247, 247, 255) !important;font-size: 12px;">
+arr_delay
+</th>
+<th style="text-align:center;color: rgba(64, 64, 64, 255) !important;background-color: rgba(247, 247, 247, 255) !important;font-size: 12px;">
+carrier
+</th>
+<th style="text-align:center;color: rgba(64, 64, 64, 255) !important;background-color: rgba(247, 247, 247, 255) !important;font-size: 12px;">
+flight
+</th>
+<th style="text-align:center;color: rgba(64, 64, 64, 255) !important;background-color: rgba(247, 247, 247, 255) !important;font-size: 12px;">
+tailnum
+</th>
+<th style="text-align:center;color: rgba(64, 64, 64, 255) !important;background-color: rgba(247, 247, 247, 255) !important;font-size: 12px;">
+origin
+</th>
+<th style="text-align:center;color: rgba(64, 64, 64, 255) !important;background-color: rgba(247, 247, 247, 255) !important;font-size: 12px;">
+dest
+</th>
+<th style="text-align:center;color: rgba(64, 64, 64, 255) !important;background-color: rgba(247, 247, 247, 255) !important;font-size: 12px;">
+air_time
+</th>
+<th style="text-align:center;color: rgba(64, 64, 64, 255) !important;background-color: rgba(247, 247, 247, 255) !important;font-size: 12px;">
+distance
+</th>
+<th style="text-align:center;color: rgba(64, 64, 64, 255) !important;background-color: rgba(247, 247, 247, 255) !important;font-size: 12px;">
+hour
+</th>
+<th style="text-align:center;color: rgba(64, 64, 64, 255) !important;background-color: rgba(247, 247, 247, 255) !important;font-size: 12px;">
+minute
+</th>
+<th style="text-align:center;color: rgba(64, 64, 64, 255) !important;background-color: rgba(247, 247, 247, 255) !important;font-size: 12px;">
+time_hour
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">
+2013
+</td>
+<td style="text-align:center;">
+1
+</td>
+<td style="text-align:center;">
+1
+</td>
+<td style="text-align:center;">
+517
+</td>
+<td style="text-align:center;">
+515
+</td>
+<td style="text-align:center;">
+2
+</td>
+<td style="text-align:center;">
+830
+</td>
+<td style="text-align:center;">
+819
+</td>
+<td style="text-align:center;">
+11
+</td>
+<td style="text-align:center;">
+UA
+</td>
+<td style="text-align:center;">
+1545
+</td>
+<td style="text-align:center;">
+N14228
+</td>
+<td style="text-align:center;">
+EWR
+</td>
+<td style="text-align:center;">
+IAH
+</td>
+<td style="text-align:center;">
+227
+</td>
+<td style="text-align:center;">
+1400
+</td>
+<td style="text-align:center;">
+5
+</td>
+<td style="text-align:center;">
+15
+</td>
+<td style="text-align:center;">
+2013-01-01 05:00:00
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+2013
+</td>
+<td style="text-align:center;">
+1
+</td>
+<td style="text-align:center;">
+1
+</td>
+<td style="text-align:center;">
+533
+</td>
+<td style="text-align:center;">
+529
+</td>
+<td style="text-align:center;">
+4
+</td>
+<td style="text-align:center;">
+850
+</td>
+<td style="text-align:center;">
+830
+</td>
+<td style="text-align:center;">
+20
+</td>
+<td style="text-align:center;">
+UA
+</td>
+<td style="text-align:center;">
+1714
+</td>
+<td style="text-align:center;">
+N24211
+</td>
+<td style="text-align:center;">
+LGA
+</td>
+<td style="text-align:center;">
+IAH
+</td>
+<td style="text-align:center;">
+227
+</td>
+<td style="text-align:center;">
+1416
+</td>
+<td style="text-align:center;">
+5
+</td>
+<td style="text-align:center;">
+29
+</td>
+<td style="text-align:center;">
+2013-01-01 05:00:00
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+2013
+</td>
+<td style="text-align:center;">
+1
+</td>
+<td style="text-align:center;">
+1
+</td>
+<td style="text-align:center;">
+542
+</td>
+<td style="text-align:center;">
+540
+</td>
+<td style="text-align:center;">
+2
+</td>
+<td style="text-align:center;">
+923
+</td>
+<td style="text-align:center;">
+850
+</td>
+<td style="text-align:center;">
+33
+</td>
+<td style="text-align:center;">
+AA
+</td>
+<td style="text-align:center;">
+1141
+</td>
+<td style="text-align:center;">
+N619AA
+</td>
+<td style="text-align:center;">
+JFK
+</td>
+<td style="text-align:center;">
+MIA
+</td>
+<td style="text-align:center;">
+160
+</td>
+<td style="text-align:center;">
+1089
+</td>
+<td style="text-align:center;">
+5
+</td>
+<td style="text-align:center;">
+40
+</td>
+<td style="text-align:center;">
+2013-01-01 05:00:00
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+2013
+</td>
+<td style="text-align:center;">
+1
+</td>
+<td style="text-align:center;">
+1
+</td>
+<td style="text-align:center;">
+544
+</td>
+<td style="text-align:center;">
+545
+</td>
+<td style="text-align:center;">
+-1
+</td>
+<td style="text-align:center;">
+1004
+</td>
+<td style="text-align:center;">
+1022
+</td>
+<td style="text-align:center;">
+-18
+</td>
+<td style="text-align:center;">
+B6
+</td>
+<td style="text-align:center;">
+725
+</td>
+<td style="text-align:center;">
+N804JB
+</td>
+<td style="text-align:center;">
+JFK
+</td>
+<td style="text-align:center;">
+BQN
+</td>
+<td style="text-align:center;">
+183
+</td>
+<td style="text-align:center;">
+1576
+</td>
+<td style="text-align:center;">
+5
+</td>
+<td style="text-align:center;">
+45
+</td>
+<td style="text-align:center;">
+2013-01-01 05:00:00
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Utilizing this dataset, the project aims to explore the predictive potential of 6 selected machine learning methods, to forecast the relation between flight arrival delay time and airline name, where <code>carrier</code> (airline name) serves as the primary independent variable, impacting the <code>arr_delay</code> (arrival delay time) as the dependent variable.</p>
+</div>
+<div id="the-models" class="section level2 hasAnchor" number="1.2">
+<h2><span class="header-section-number">1.2</span> The models<a href="index.html#the-models" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Concluding this introduction, here is the list of the selected models to be studied:</p>
+<ol style="list-style-type: decimal">
+<li><p>A simple Linear Model</p></li>
+<li><p>A generalized Linear Model with family set to Poisson</p></li>
+<li><p>A generalized Linear Model with family set to Binomial</p></li>
+<li><p>A Support Vector Machine</p></li>
+<li><p>A generalized Additive Model</p></li>
+<li><p>A neural Network</p></li>
+</ol>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+
+<a href="simple-linear-model.html" class="navigation navigation-next navigation-unique" aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"whatsapp": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": "https://github.com/EliB29/Rboot_camp/edit/main/index.Rmd",
+"text": "Edit"
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": "https://github.com/EliB29/Rboot_camp/blob/main/index.Rmd",
+"text": null
+},
+"download": null,
+"search": {
+"engine": "fuse",
+"options": null
+},
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/latest.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>
