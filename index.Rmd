@@ -1,0 +1,89 @@
+---
+title: "Applied Machine Learning"
+author: "Sheptim, Wei-Han & Eliana Perea Barreto"
+date: "`r Sys.Date()`"
+site: bookdown::bookdown_site
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r enviroment, message=FALSE, warning=FALSE, include=FALSE}
+# Loading libraries 
+library(nycflights13)
+library(kableExtra)
+```
+
+```{r working_data, warning=FALSE, cache=TRUE, include=FALSE}
+data_flight <- flights 
+head(data_flight, 4)
+```
+
+# Introduction
+
+In the contemporary landscape of Applied Machine Learning, predictive modeling has emerged as a crucial field of study to derive insights from data. This field encompasses a variety of methods, each showcasing distinct capabilities worthy of exploration. This project aims to comprehensively understand six machine learning methods, focusing on their application, structure, and outcomes, by covering the following key aspects.
+
+Firstly, an overview to introduce the fundamental principles of the model. Following, an in-depth examination of the algorithmic framework to explore the model's architecture and computational mechanisms. Subsequently, a detailed description of the model's training and predicting process to elucidate how the model acquires knowledge and makes predictions. Finally, an assessment of the strengths and limitations of the model to evaluate its practical utility, considering factors like interpretability, scalability and computational complexity.
+
+## Dataset
+
+The dataset comprises an array of 19 predictors that withhold historical information regarding flight operations for all aircrafts departing from New York City airports throughout 2013. This table is easily accessible through the implementation of the following code:
+
+```         
+library(nycflights13)
+data_flight <- flights 
+```
+
+As you can see in the code, this dataset is sourced from the `nycflights13` library in R, and despite containing only 19 predictors, it encompasses a total of 336,776 entries, which exceeds the criteria for a "moderate" dataset. To meet the project's criteria of working with a dataset within a range of 10\^3 to 10\^5 rows, and also to simplify the analysis of the data, a method of random sampling is used to shrink the table to 5000 entries. Click on `Code Preview` to learn how this operation is coded.
+
+<details>
+
+`<summary><b style="font-size:90%; border: 1px solid gray; border-radius: 5px; padding: 5px;`{=html} `">`{=html}Code Preview </b>
+
+</summary>
+
+```         
+# Set random seed to ensure reproducibility.
+set.seed(123)
+
+# Randomly select 5000 row indices and use them to subset original data.
+selected_indices <- sample(1:nrow(data_flight), 5000, replace = FALSE)
+data_flight <- data_flight[selected_indices, ]
+```
+
+</details>
+
+------------------------------------------------------------------------
+
+The table contains discrete categorical and numerical variables associated to predictors like year, month, day, carrier, origin, destination, and tail number. Additionally, continuous numerical attributes such as hour, minute, departure time, arrival time, departure delay, arrival delay, air time, and distance are included. Likewise, among the categorical variables, some are ordinal, like the month, while others are nominal, such as carrier, origin, destination, and tail number. Below, you'll find a detailed depiction of the table layout and the column names:
+
+```{r flight_table, echo=FALSE, results='asis'}
+
+# Defining table structure
+cat('<div style="overflow-x : auto; white-space: nowrap;">')
+knitr::kable(head(data_flight, 4), 
+             align = c(rep('c',times=19)))%>%
+  kable_styling(font_size = 11, 
+                html_font = "sans-serif")%>%
+  row_spec(0, bold = F, font_size = 12,  color = "#404040", background = "#F7F7F7")
+cat('</div>')
+```
+
+Utilizing this dataset, the project aims to explore the predictive potential of 6 selected machine learning methods, to forecast the relation between flight arrival delay time and airline name, where `carrier` (airline name) serves as the primary independent variable, impacting the `arr_delay` (arrival delay time) as the dependent variable.
+
+## The models
+
+Concluding this introduction, here is the list of the selected models to be studied:
+
+1.  A simple Linear Model
+
+2.  A generalized Linear Model with family set to Poisson
+
+3.  A generalized Linear Model with family set to Binomial
+
+4.  A Support Vector Machine
+
+5.  A generalized Additive Model
+
+6.  A neural Network

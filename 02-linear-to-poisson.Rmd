@@ -1,0 +1,152 @@
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r libraries, message=FALSE, warning=FALSE, include=FALSE}
+library(nycflights13)
+library(scales)
+library(plotly)
+library(dplyr)
+```
+
+```{r environment, warning=FALSE, cache=TRUE, include=FALSE}
+
+# Import dataset
+data_flight <- flights 
+
+# Set random seed to ensure reproducibility.
+set.seed(123)
+
+# Randomly select 5000 row indices and use them to subset original data.
+selected_indices <- sample(1:nrow(data_flight), 5000, replace = FALSE)
+data_flight <- data_flight[selected_indices, ]
+```
+
+# Poisson Linear Regression
+
+## Overview
+
+Poisson regression stands as a powerful method suited for the analysis of count data, focusing on modeling event occurrences typically expressed as whole numbers. Unlike standard linear regression, which deals with continuous data, Poisson regression is tailored for situations where the data mirrors a Poisson distribution. Therefore, values are counts of events within fixed temporal or spatial boundaries. In essence, this method is similar to standard linear regression, with the notable distinction that the dependent variable (y) represents the expected value of observed counts within a fixed frame.
+
+## Algorithmic Framework
+
+### Data Nature
+
+In contrast to continuous variables, Poisson Distribution data points are restricted to non-negative integers, where (y) can only assume values of zero or greater. Illustratively, let's take a practical look to the implementation of this idea, analysing the relation between the predictors carrier (airline names) (x) and flight arrival delay times (y) from the `nycflights13` library.
+
+```{r data_cleaning, echo=FALSE}
+
+# Define lower and upper bounds for outliers
+Q1 <- quantile(data_flight$arr_delay, 0.25, na.rm = TRUE)
+Q3 <- quantile(data_flight$arr_delay, 0.75, na.rm = TRUE)
+lower_bound <- Q1 - 1.5 * (Q3 - Q1)
+upper_bound <- Q3 + 1.5 * (Q3 - Q1)
+
+# Replace outliers and NA values by the mean of the column
+# 0 is the lower bound as negative values are irrelevant for the investigation.
+mean_arr_delay <- mean(data_flight$arr_delay, na.rm = TRUE)
+
+data_flight <- data_flight %>%
+  mutate( arr_delay = ifelse(is.na(arr_delay)
+                             | arr_delay < lower_bound | arr_delay > upper_bound, 
+                             mean_arr_delay, arr_delay))
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+summary(data_flight$arr_delay)
+```
+
+The summary of the predictor `arr_delay`, reveals the challenge of converting its continuous variables into count data; through the segmentation of the values by intervals of time (from 0 to 60 minutes by steps of 3). Additionally, the median and mean reveals a prevalence of negative values deemed irrelavant for this study. They will be set to zero, despite the potential complications of getting an overabundance of zero-count entries in the prediction process.
+
+<details>
+
+`<summary><b style="font-size:90%; border: 1px solid gray; border-radius: 5px; padding: 5px;`{=html} `">`{=html}Code Preview </b>
+
+</summary>
+
+```         
+intervals <- seq(0, upper_bound, by = 3) # 3-minute interval definition
+
+# Discretize arrival delays into intervals, count occurrences and set negatives to zero. 
+delay_counts <- data_flight %>% 
+  mutate(
+    arr_delay = ifelse(arr_delay < 0, 0, arr_delay), # Negative to zero
+    delay_interval = cut(arr_delay, breaks = intervals, include.lowest = TRUE))%>%
+  group_by(delay_interval, carrier)%>%
+  summarise(delay_count = n())
+```
+
+</details>
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+intervals <- seq(0, upper_bound, by = 3) # 3-minute Interval definition
+
+# Discretize arrival delays into intervals, count occurrences and set negatives to zero. 
+delay_counts <- data_flight %>% 
+  mutate(
+    arr_delay = ifelse(arr_delay < 0, 0, arr_delay), # Negative to zero
+    delay_interval = cut(arr_delay, breaks = intervals, include.lowest = TRUE))%>%
+  group_by(delay_interval, carrier)%>%
+  summarise(delay_count = n())
+
+# Count total occurences for inteval [0,3] and its relative percentage weight. 
+count_0_interval <- sum(delay_counts$delay_count[delay_counts$delay_interval == "[0,3]"])
+percentage <- percent(count_0_interval/sum(delay_counts$delay_count))
+
+cat("Occurences for interval [0,3]:", count_0_interval, "In percentage:", percentage)
+```
+
+Post-segmentation, a significant portion of the dataset falls within the 0 to 3-minute delay range, prompting a later scrutiny for potential model challenges. For the moment, let's visualized the distribution of the newly generated count data across time intervals and carriers. This data is allocated to the predictor `delay_count` and will be used as the dependent variable of the model.
+
+```{r echo=FALSE, fig.height=4.5, message=FALSE, warning=FALSE, paged.print=FALSE}
+# Create a static scatter plot
+plot_ly(delay_counts, x = ~carrier, y = ~delay_interval,
+        type = 'scatter', 
+        mode = 'markers',
+        text = ~delay_count,
+        marker = list(size = 10,  # Adjust marker size
+                      color = ~pmin(pmax(delay_count, 10), 100)), 
+        showlegend = TRUE) %>%
+  layout(xaxis = list(title = 'Carrier: Airline name'),
+         yaxis = list(title = 'Delay Interval'))
+```
+
+------------------------------------------------------------------------
+
+As for the independent variable, it's evident from the plot that the values in `carrier` are nominal categorical. Which is okey, as independent variables can be of any type in Poisson Regression.
+
+### Regression equation
+
+A few things can be derived from the assumption that the dependent variable in a Poisson-like distribution represent counts events occurring within a fixed boundary. For example, if those data points were to be represented in the Cartesian plane, they would also exist in a fixed space. In this scenario, a standard regression line, which may also predict negative values, is unsuitable for Poisson regression. Look at the example below:
+
+![](r_squared_4.png){width="665"}
+
+Notice that the line representing linear growth can very easily go below the origin at any given point while the starting point of the exponential line remains fixed. A non-linear relationship, typified by an exponential line, proves better-suited for this model. Consequently, the concept of exponential growth is included within the model's regression equation, where a logarithmic transformation withholds the relationship between the dependent variable and the independent variable with its coefficients. This ensures that the starting point of the exponential line never goes below zero. Also, the regression line becomes curved due to the natural logarithm's application.
+
+$$
+y = e^{(\beta_0 + \beta_1x_1)} \quad\text{  or }\quad log(y) = \beta_0 + \beta_1x_1
+$$
+
+It's essential to recognize that (y) symbolizes the incidence rate of an event per unit of exposure, rather than the count of observed events. Replaced by the symbol (λ) or notated along with y∼Poisson(λ), (y) is understood as a rate parameter. This idea is pivotal, as concepts like the mean and variance hinge on it. For instance, since (λ) denotes the average rate of event occurrences within a fixed interval, the mean (expected value) remains equivalent to (λ).Consequently, as the mean increases, the range of possible outcomes expands. In other wordds, the distribution's variability increases, which emphasises the symmetrical association between the mean and the variance in Poisson Distribution.
+
+$$ \lambda = e^{(\beta_0 + \beta_1x)} \quad \quad \text{or} \quad \quad y=e^{(\beta_0 + \beta_1x_1)} \quad y\sim Poisson(\lambda) $$
+
+Elements of this equation, such as the rate parameter (λ) and the coefficients (β0, β1), are automatically calculated through the implementation of the function `glm(..., family = "poisson")`. Let's fit the model:
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+poisson_model <- glm(delay_count ~ carrier, data = delay_counts, family = "poisson")
+```
+
+<details>
+
+`<summary><b style="font-size:90%; border: 1px solid gray; border-radius: 5px; padding: 5px;`{=html} `">`{=html}Output </b>
+
+</summary>
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+summary(poisson_model)
+```
+
+</details>
+
+## Training & Predicting Process

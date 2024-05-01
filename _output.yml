@@ -1,0 +1,8 @@
+bookdown::gitbook:
+  css: style.css
+  config:
+    toc:
+      before: |
+        <li><a href="./">Applied ML</a></li>
+      after: |
+        <li><a href="https://github.com/EliB29/Rboot_camp" target="blank">Published with bookdown</a></li>
