@@ -26,8 +26,7 @@ data_flight <- data_flight[selected_indices, ]
 
 ## Overview
 
-Poisson regression stands as a powerful method suited for the analysis of count data, focusing on modeling event occurrences typically expressed as whole numbers. Unlike standard linear regression, which deals with continuous data, Poisson regression is tailored for situations where the data mirrors a Poisson distribution. Therefore, values are counts of events within fixed temporal or spatial boundaries. In essence, this method is similar to standard linear regression, with the notable distinction that the dependent variable (y) represents the expected value of observed counts within a fixed frame.
-
+Poisson regression stands as a powerful method suited for the analysis of count data, focusing on events expressed as whole numbers. Unlike linear regression, which handles continuous data, Poisson regression suits situations reflecting a Poisson distribution, where the dependent variable (y) represent counts within fixed temporal or spatial boundaries.
 ## Algorithmic Framework
 
 ### Data Nature
