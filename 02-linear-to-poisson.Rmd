@@ -1,7 +1,3 @@
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
 ```{r libraries, message=FALSE, warning=FALSE, include=FALSE}
 library(nycflights13)
 library(scales)
@@ -9,7 +5,7 @@ library(plotly)
 library(dplyr)
 ```
 
-```{r environment, warning=FALSE, cache=TRUE, include=FALSE}
+```{r environment_pr, warning=FALSE, cache=TRUE, include=FALSE}
 
 # Import dataset
 data_flight <- flights 
@@ -43,20 +39,17 @@ lower_bound <- Q1 - 1.5 * (Q3 - Q1)
 upper_bound <- Q3 + 1.5 * (Q3 - Q1)
 
 # Replace outliers and NA values by the mean of the column
-# 0 is the lower bound as negative values are irrelevant for the investigation.
 mean_arr_delay <- mean(data_flight$arr_delay, na.rm = TRUE)
 
 data_flight <- data_flight %>%
-  mutate( arr_delay = ifelse(is.na(arr_delay)
-                             | arr_delay < lower_bound | arr_delay > upper_bound, 
-                             mean_arr_delay, arr_delay))
+  mutate( arr_delay = ifelse(is.na(arr_delay) | arr_delay < lower_bound | arr_delay > upper_bound,  mean_arr_delay, arr_delay))
 ```
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 summary(data_flight$arr_delay)
 ```
 
-The summary of the predictor `arr_delay`, reveals the challenge of converting its continuous variables into count data; through the segmentation of the values by intervals of time (from 0 to 60 minutes by steps of 3). Additionally, the median and mean reveals a prevalence of negative values deemed irrelavant for this study. They will be set to zero, despite the potential complications of getting an overabundance of zero-count entries in the prediction process.
+Examining the dependent variable `arr_delay`, a main challenge arises as this predictor contains continuous values. To address this, the values are spitted into intervals of 3 minutes each. So that, the occurrence of arrival delays for each carrier can be quantified. Looking at the summary, it's also possible to acknowledge that the median and mean reveals a prevalence of negative values deemed irrelevant, as the goal of this exercise is to inspect the relationship between the presence (not the absence) of arrival delays for each carrier. Thus, all values lower or equal to zero won't be taken into consideration. Click on code preview to see how the data was counted and segmented by intervals of time.
 
 <details>
 
@@ -65,47 +58,39 @@ The summary of the predictor `arr_delay`, reveals the challenge of converting it
 </summary>
 
 ```         
-intervals <- seq(0, upper_bound, by = 3) # 3-minute interval definition
+interval <-seq(1, upper_bound+0.5, by = 3)  # 0.5 is needed as the count is asymmetrical. 
 
-# Discretize arrival delays into intervals, count occurrences and set negatives to zero. 
-delay_counts <- data_flight %>% 
-  mutate(
-    arr_delay = ifelse(arr_delay < 0, 0, arr_delay), # Negative to zero
-    delay_interval = cut(arr_delay, breaks = intervals, include.lowest = TRUE))%>%
+# Discretize arrival delays into intervals and count occurrences. 
+delay_counts_1 <- data_flight %>%
+  filter(arr_delay > 0)%>% 
+  mutate(delay_interval = cut(arr_delay, breaks = interval,  right = T, include.lowest = T))%>%
   group_by(delay_interval, carrier)%>%
   summarise(delay_count = n())
 ```
 
 </details>
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
-intervals <- seq(0, upper_bound, by = 3) # 3-minute Interval definition
+```{r message=FALSE, warning=FALSE, include=FALSE}
+interval <-seq(1, upper_bound +0.5, by = 3)  # addittion of 0.5 is needed given that the interval aren't symmetrical. 
 
-# Discretize arrival delays into intervals, count occurrences and set negatives to zero. 
-delay_counts <- data_flight %>% 
-  mutate(
-    arr_delay = ifelse(arr_delay < 0, 0, arr_delay), # Negative to zero
-    delay_interval = cut(arr_delay, breaks = intervals, include.lowest = TRUE))%>%
+# Discretize arrival delays into intervals and count occurrences. 
+delay_counts <- data_flight %>%
+  filter(arr_delay > 0)%>% 
+  mutate(delay_interval = cut(arr_delay, breaks = interval,  right = T, include.lowest = T))%>%
   group_by(delay_interval, carrier)%>%
   summarise(delay_count = n())
-
-# Count total occurences for inteval [0,3] and its relative percentage weight. 
-count_0_interval <- sum(delay_counts$delay_count[delay_counts$delay_interval == "[0,3]"])
-percentage <- percent(count_0_interval/sum(delay_counts$delay_count))
-
-cat("Occurences for interval [0,3]:", count_0_interval, "In percentage:", percentage)
 ```
 
-Post-segmentation, a significant portion of the dataset falls within the 0 to 3-minute delay range, prompting a later scrutiny for potential model challenges. For the moment, let's visualized the distribution of the newly generated count data across time intervals and carriers. This data is allocated to the predictor `delay_count` and will be used as the dependent variable of the model.
+The distribution of the newly generated count data across time intervals serves as the model's dependent variables and it is assigned to the predictor `delay_count`. In the visualization below, you'll observe that darker shades indicate a higher frequency of events per delay interval of time and carrier name.
 
 ```{r echo=FALSE, fig.height=4.5, message=FALSE, warning=FALSE, paged.print=FALSE}
-# Create a static scatter plot
+
 plot_ly(delay_counts, x = ~carrier, y = ~delay_interval,
         type = 'scatter', 
         mode = 'markers',
         text = ~delay_count,
-        marker = list(size = 10,  # Adjust marker size
-                      color = ~pmin(pmax(delay_count, 10), 100)), 
+        marker = list(size = 10,  
+                      color = ~pmin(pmax(delay_count, 5), 100)), # Adjust marker color within delay_count range
         showlegend = TRUE) %>%
   layout(xaxis = list(title = 'Carrier: Airline name'),
          yaxis = list(title = 'Delay Interval'))
@@ -113,7 +98,7 @@ plot_ly(delay_counts, x = ~carrier, y = ~delay_interval,
 
 ------------------------------------------------------------------------
 
-As for the independent variable, it's evident from the plot that the values in `carrier` are nominal categorical. Which is okey, as independent variables can be of any type in Poisson Regression.
+As for the independent variable, it's evident from the plot that the values in `carrier` are nominal categorical. Which is okey, as independent variables can be of any type in Poisson Regression. Sometimes they must be encoded appropriately before fitting the model, for instance through dummy variables, one-hot encoding or factorization. However in this case, as the main focus is on examining the association between delay counts and carrier identity with no other predictor variables included, the categorical variable "carrier" can directly be implemented in the model .
 
 ### Regression equation
 
@@ -121,32 +106,168 @@ A few things can be derived from the assumption that the dependent variable in a
 
 ![](r_squared_4.png){width="665"}
 
-Notice that the line representing linear growth can very easily go below the origin at any given point while the starting point of the exponential line remains fixed. A non-linear relationship, typified by an exponential line, proves better-suited for this model. Consequently, the concept of exponential growth is included within the model's regression equation, where a logarithmic transformation withholds the relationship between the dependent variable and the independent variable with its coefficients. This ensures that the starting point of the exponential line never goes below zero. Also, the regression line becomes curved due to the natural logarithm's application.
+Notice that the line representing linear growth can very easily go below the origin at any given point while the starting point of the exponential line remains fixed. A non-linear relationship, typified by an exponential line, proves better-suited for this model. Consequently, the concept of exponential growth is included within the model's regression equation, where a logarithmic transformation withholds the relationship between the dependent variable and the independent variable with its coefficients.
 
 $$
 y = e^{(\beta_0 + \beta_1x_1)} \quad\text{  or }\quad log(y) = \beta_0 + \beta_1x_1
 $$
 
-It's essential to recognize that (y) symbolizes the incidence rate of an event per unit of exposure, rather than the count of observed events. Replaced by the symbol (λ) or notated along with y∼Poisson(λ), (y) is understood as a rate parameter. This idea is pivotal, as concepts like the mean and variance hinge on it. For instance, since (λ) denotes the average rate of event occurrences within a fixed interval, the mean (expected value) remains equivalent to (λ).Consequently, as the mean increases, the range of possible outcomes expands. In other wordds, the distribution's variability increases, which emphasises the symmetrical association between the mean and the variance in Poisson Distribution.
+It's essential to recognize that (y) symbolizes the incidence rate of an event per unit of exposure, rather than the count of observed events. Replaced by the symbol (λ) or notated along with y∼Poisson(λ), (y) is understood as a rate parameter. This idea is pivotal, as concepts like the mean and variance hinge on it. For instance, since (λ) denotes the average rate of event occurrences within a fixed interval, the mean (expected value) remains equivalent to (λ). Consequently, as the mean increases, the range of possible outcomes expands. In other words, the distribution's variability increases, which emphasizes the symmetrical association between the mean and the variance in Poisson Distribution.
 
 $$ \lambda = e^{(\beta_0 + \beta_1x)} \quad \quad \text{or} \quad \quad y=e^{(\beta_0 + \beta_1x_1)} \quad y\sim Poisson(\lambda) $$
 
-Elements of this equation, such as the rate parameter (λ) and the coefficients (β0, β1), are automatically calculated through the implementation of the function `glm(..., family = "poisson")`. Let's fit the model:
+Elements of this equation, such as the rate parameter (λ) and the coefficients (β0, β1), are automatically calculated through the implementation of the function GLM with family set to poisson `glm(..., family = "poisson")`.
+
+Ultimately, before starting training or prediction, the model will be fitted with all available data to evaluate the accuracy of the model and the relationship of the variables.
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
-poisson_model <- glm(delay_count ~ carrier, data = delay_counts, family = "poisson")
+poisson_model_eval <- glm(delay_count ~ carrier, data = delay_counts, family = "poisson")
 ```
 
 <details>
 
-`<summary><b style="font-size:90%; border: 1px solid gray; border-radius: 5px; padding: 5px;`{=html} `">`{=html}Output </b>
+`<summary><b style="font-size:90%; border: 1px solid gray; border-radius: 5px; padding: 5px;`{=html} `">`{=html}summary </b>
 
 </summary>
 
-```{r echo=TRUE, message=FALSE, warning=FALSE}
-summary(poisson_model)
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+summary(poisson_model_eval)
 ```
 
 </details>
 
+The model seems to effectively capture significant correlations among the variables, as indicated by the majority of carrier coefficients exhibiting statistically significant p-values. However, carrier US stands out with a coefficient surpassing 0.05, suggesting its potential minimal impact on delay occurrences. Thus, it might be prudent to contemplate excluding carrier US from the model. Nevertheless, before making any adjustments, let's explore other potential factors that might be affecting the accuracy of the model.
+
+Notably, the coefficient estimates for carriers AS, OO, HA, and YV share an identical coefficient estimate of -1.83468 which is an unusual situation, unless these carriers are somehow grouped by a common circumstance. Upon reviewing the plot presented above, it's apparent that these carriers are consistently associated with limited data, which is also evident by their relatively high standard errors (0.71302 for carriers AS and YV, and 1.00419 for carrier OO). The scarcity of data leads to less precise estimates, thus removing these coefficients might be a wise decision to improve the model's reliability and predictive accuracy.
+
+```{r}
+delay_counts_new <- delay_counts[!(delay_counts$carrier %in% c("AS", "OO", "YV", "HA")), ]
+poisson_model_eval <- glm(delay_count ~ carrier, data = delay_counts_new, family = "poisson")
+```
+
+<details>
+
+`<summary><b style="font-size:90%; border: 1px solid gray; border-radius: 5px; padding: 5px;`{=html} `">`{=html}summary </b>
+
+</summary>
+
+```{r echo=FALSE, warning=FALSE}
+
+summary(poisson_model_eval)
+
+```
+
+</details>
+
+The residual deviance of the revised model remains at 2563.9, indicating that the overall model fit remains consistent even after excluding carriers AS, OO, HA and YV from the dataset. The decrease in the AIC value from 3295 to 3279 suggests a slight enhancement in model fit following the removal of the three carriers. However, the standard error and p-value for all coefficients remain unchanged, so carrier US still lacks significant influence, as evidenced by its p-value of 0.184948.
+
 ## Training & Predicting Process
+
+Despite, GLM for Poisson regression doesn't have specific built-in functions for training and testing like some machine learning algorithms, it can still be employed along with standard techniques for forecasting. Following the assesment of the data distribution, the subsequent phase involves dividing the dataset into training and testing subsets to evaluate the model's performance. 80% of the data is allocated for GLM fitting while the remaining 20% is reserved for the evaluation the model's predictive accuracy using the `predict()` function.
+
+<details>
+
+`<summary><b style="font-size:90%; border: 1px solid gray; border-radius: 5px; padding: 5px;`{=html} `">`{=html}Code Preview </b>
+
+</summary>
+
+```         
+# Split the data (80% training, 20% testing)
+index <- sample(1:nrow(delay_counts_new), 0.8*nrow(delay_counts_new))
+training_data <- delay_counts_new[index, ]
+testing_data <- delay_counts_new[-index, ]
+```
+
+</details>
+
+```{r include=FALSE}
+# Split the data (80% training, 20% testing)
+index <- sample(1:nrow(delay_counts_new), 0.8*nrow(delay_counts_new))
+training_data <- delay_counts_new[index, ]
+testing_data <- delay_counts_new[-index, ]
+actual_counts <- testing_data$delay_count
+```
+
+```{r message=FALSE, warning=FALSE}
+poisson_model <- glm(delay_count ~ carrier, data = training_data, family = "poisson")
+predicted_counts <- predict(poisson_model, newdata = testing_data, type = "response")
+```
+
+When assessing the precision of predictions generated by a Poisson regression model, various metrics can be utilized to measure the correspondence between the model's predictions and the actual data. Nonetheless, let's first initiate the process by gaining insight into the relationship between the predicted and the actual counts through a line plot..
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Create a data frame with Index, Actual, and Predicted
+plot_data <- data.frame(Index = 1:nrow(testing_data), 
+                        delay_interval = testing_data$delay_interval,
+                        Actual = testing_data$delay_count, 
+                        Predicted = predicted_counts)
+
+# Create the plot
+plot_ly(data = plot_data, x = ~Index) %>%
+  add_lines(y = ~Actual, name = 'Actual', line = list(color = 'blue'), 
+            hoverinfo = 'y+text', 
+            text = ~paste("Delay Interval: ", delay_interval)) %>%
+  add_lines(y = ~Predicted, name = 'Predicted', line = list(color = 'red'), 
+            hoverinfo = 'y+text', 
+            text = ~paste("Delay Interval: ", delay_interval)) %>%
+  layout(title = "Actual vs. Predicted Counts by index in dataset",
+         xaxis = list(title = "Index"),
+         yaxis = list(title = "Count"),
+         margin = list(b = 90),
+         legend = list(x = 1, y = 0.5, xanchor = "right", yanchor = "middle"))
+```
+
+From the observed visual data, disparities between the anticipated and observed counts stand out, particularly within the intervals [1,4] and [4,7]. Nonetheless, it is imperative to quantify the model's performance using metrics such as the Mean Squared Error (MSE) and Mean Absolute Error (MAE) to assess the real efficiency of the current model. These metrics will be compared against a baseline which is made of the MSE and MAE of the training data's delay counts. In the analysis, the following values were obtained:
+
+<details>
+
+`<summary><b style="font-size:90%; border: 1px solid gray; border-radius: 5px; padding: 5px;`{=html} `">`{=html}Code Preview </b>
+
+</summary>
+
+```         
+baseline_predictions <- rep(mean(training_data$delay_count), nrow(testing_data))
+
+# Calculate MSE and MAE for the baseline model
+baseline_mse <- mean((actual_counts - baseline_predictions)^2)
+baseline_mae <- mean(abs(actual_counts - baseline_predictions))
+
+
+# Calculate Model's MSE and MAE
+mse <- mean((actual_counts - predicted_counts)^2)
+mae <- mean(abs(actual_counts - predicted_counts))
+```
+
+</details>
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+baseline_predictions <- rep(mean(training_data$delay_count), nrow(testing_data))
+
+# Calculate MSE and MAE for the baseline model
+baseline_mse <- mean((actual_counts - baseline_predictions)^2)
+baseline_mae <- mean(abs(actual_counts - baseline_predictions))
+
+
+# Calculate Model's MSE and MAE
+mse <- mean((actual_counts - predicted_counts)^2)
+mae <- mean(abs(actual_counts - predicted_counts))
+
+# Print baseline MSE and MAE
+print(paste("Baseline MSE:", baseline_mse))
+print(paste("Model MSE:", mse))
+print(paste("Baseline MAE:", baseline_mae))
+print(paste("Model MAE:", mae))
+```
+
+The results of the evaluation indicate that the baseline model achieves a lower MSE and MAE compared to the predictive model. These findings suggest that the baseline model performs slightly better than the predictive model in terms of both MSE and MAE. However, the differences between the metrics are relatively small. Nevertheless, further investigation and refinement of the predictive model may be necessary to achieve significant improvements in performance, particularly for intervals [1,4] and [4,7].
+
+## Strengths & Limitations
+
+### Strengths
+
+Poisson regression stands out as an ideal method for examining phenomena such as occurrences of flight delays categorized by intervals, offering a robust framework for modeling events expressed as whole numbers. Its alignment with the Poisson distribution ensures accurate representation of count data dynamics, enhancing precision in modeling outcomes. Moreover, the model's flexibility in handling various predictor types allows for versatile modeling approaches.
+
+### Limitations
+
+While powerful for count data analysis, comes with its share of limitations. The assumption of independence among events, while foundational, may not always reflect real-world scenarios accurately. Overdispersion, where the variance exceeds the mean, can inflate errors and compromise accuracy. Despite its flexibility in handling predictor variables, Poisson regression may struggle to capture complex relationships effectively, potentially limiting its predictive capabilities. Moreover, its sensitivity to outliers necessitates meticulous preprocessing to mitigate their influence on model stability.
