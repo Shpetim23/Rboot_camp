@@ -32,7 +32,7 @@ Poisson regression stands as a powerful method suited for the analysis of count 
 
 ### Data Nature
 
-In contrast to continuous variables, Poisson Distribution data points are restricted to non-negative integers, where (y) can only assume values of zero or greater. Illustratively, let's take a practical look to the implementation of this idea, analysing the relation between the predictors carrier (airline names) (x) and flight arrival delay times (y) from the `nycflights13` library.
+In contrast to continuous variables, Poisson Distribution data points are restricted to non-negative integers, where (y) can only assume values of zero or greater. Illustratively, let's take a practical look to the implementation of this idea by analyzing the response variable (y) `arr_delay` from our study case which, as previously mentioned, is aimed at inspecting the relationship between carrier name and the frequency of flight delays.
 
 ```{r data_cleaning, echo=FALSE}
 
