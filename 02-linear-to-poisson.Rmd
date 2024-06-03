@@ -264,7 +264,7 @@ The results of the evaluation indicate that the baseline model achieves a lower 
 
 ## Strengths & Limitations
 
-### Strengths
+### Strength
 
 Poisson regression stands out as an ideal method for examining phenomena such as occurrences of flight delays categorized by intervals, offering a robust framework for modeling events expressed as whole numbers. Its alignment with the Poisson distribution ensures accurate representation of count data dynamics, enhancing precision in modeling outcomes. Moreover, the model's flexibility in handling various predictor types allows for versatile modeling approaches.
 
