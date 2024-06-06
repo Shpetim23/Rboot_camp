@@ -2,7 +2,7 @@
 
 Introduction
 
-The Generalized Additive Model (GAM) represents an advanced statistical approach designed to capture non-linear relationships between predictor and response variables. Developed by Hastie and Tibshirani in 1986, GAMs extend linear models by allowing non-linear functions of predictor variables while maintaining additivity. This flexibility makes GAMs particularly useful in scenarios where the relationship between variables is complex and cannot be adequately modeled with simple linear terms. In this study, we apply GAM to predict the log-transformed flight arrival delays using the 'carrier' variable from the nycflights13 dataset. This analysis aims to assess the effectiveness of GAM in modeling flight delays and uncover patterns associated with different airlines.
+The Generalized Additive Model (GAM) represents an advanced statistical approach designed to capture non-linear relationships between predictor and response variables. GAMs extend linear models by allowing non-linear functions of predictor variables while maintaining additivity. This flexibility makes GAMs particularly useful in scenarios where the relationship between variables is complex and cannot be adequately modeled with simple linear terms. In this report, we apply GAM to predict the log-transformed flight arrival delays using the 'carrier' variable from the nycflights13 dataset. This analysis aims to assess the effectiveness of GAM in modeling flight delays and uncover patterns associated with different airlines.
 
 Data Preparation
 
